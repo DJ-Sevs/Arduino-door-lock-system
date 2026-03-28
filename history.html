@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='history.css') }}">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Access Dashboard</h1>
+
+        <div class="stats-container">
+            {% for stat in user_stats %}
+            <div class="stat-card">
+                <small>{{ stat.username }}</small><br>
+                <strong>{{ stat.success_count }} Successes</strong>
+            </div>
+            {% endfor %}
+            
+            <div class="stat-card alert">
+                <small>Security Alerts</small><br>
+                <strong>{{ unknown_count }} Unknown PINs</strong>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-open" onclick="openDoor()">Open Door</button>
+            <a href="{{ url_for('manage_users') }}" class="btn btn-manage">Manage Users</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>PIN</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody id="log-body">
+                    {% for row in logs %}
+                    <tr class="{{ 'success' if 'SUCCESS' in row.event else 'failure' }}">
+                        <td>{{ row.event }}</td>
+                        <td><code>{{ row.pin }}</code></td>
+                        <td>{{ row.timestamp }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        socket.on('new_log', (data) => {
+            location.reload(); 
+        });
+
+        function openDoor() {
+            fetch('/open-door', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') alert('Door Unlocked!');
+                });
+        }
+    </script>
+</body>
+</html>

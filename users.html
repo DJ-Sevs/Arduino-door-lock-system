@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Users</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='history.css') }}">
+    <style>
+        .error-banner {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #f44336;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+        }
+        .edit-mode { border: 2px solid #3498db; background-color: #f1f8ff; }
+        .btn-small { padding: 6px 12px; min-width: 80px; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Authorized Users</h1>
+        
+        {% if error %}
+        <div class="error-banner">
+            <strong>Action Denied:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="form-container {{ 'edit-mode' if edit_user else '' }}">
+            <h3>{{ 'Edit User Credentials' if edit_user else 'Add New User' }}</h3>
+            <form method="POST" class="controls" style="justify-content: flex-start;">
+                <input type="text" name="username" placeholder="Full Name" required 
+                       value="{{ edit_user.username if edit_user else '' }}"
+                       style="padding: 10px; border-radius: 4px; border: 1px solid #ccc; flex: 2;">
+                
+                <input type="text" name="pin_code" placeholder="4-Digit PIN" maxlength="4" required 
+                       value="{{ edit_user.pin_code if edit_user else '' }}"
+                       style="padding: 10px; border-radius: 4px; border: 1px solid #ccc; flex: 1;">
+                
+                <button type="submit" class="btn {{ 'btn-open' if edit_user else 'btn-manage' }}">
+                    {{ 'Update' if edit_user else 'Register' }}
+                </button>
+                
+                {% if edit_user %}
+                <a href="{{ url_for('manage_users') }}" class="btn" style="background:#999; color:white;">Cancel</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>PIN</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                        <tr >
+                        <td>{{ u.username }}</td>
+                        <td><code>{{ u.pin_code }}</code></td>
+                        <td>
+                            <a href="{{ url_for('edit_user', user_id=u.id) }}" class="btn btn-open btn-small">Edit</a>
+                            <a href="{{ url_for('delete_user', user_id=u.id) }}" 
+                               class="btn btn-logout btn-small" 
+                               style="background:#d93025;"
+                               onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="text-align: center; margin-top: 25px;">
+            <a href="{{ url_for('history') }}" style="color: #1a73e8; text-decoration: none;">← Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>
